@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Жалобы{% endblock %}
+{% block content %}
+<h1>Жалобы</h1>
+
+<form class="filters" method="get" action="/admin/complaints">
+  <select name="complaint_status">
+    <option value="">Все статусы</option>
+    {% for slug, label in COMPLAINT_STATUS_LABELS.items() %}
+    <option value="{{ slug }}" {{ 'selected' if filters.status == slug }}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Найти</button>
+</form>
+
+{% if complaints %}
+<table>
+  <tr><th>#</th><th>Объявление</th><th>Автор жалобы</th><th>Причина</th><th>Комментарий</th><th>Статус</th><th>Дата</th><th>Действия</th></tr>
+  {% for c in complaints %}
+  <tr>
+    <td>{{ c.id }}</td>
+    <td>{% if c.ad %}<a href="/admin/ads/{{ c.ad.id }}">{{ c.ad.title }}</a>{% else %}—{% endif %}</td>
+    <td>{{ c.author.name if c.author else '—' }}</td>
+    <td>{{ COMPLAINT_REASON_LABELS.get(c.reason, c.reason) }}</td>
+    <td>{{ c.text or '—' }}</td>
+    <td><span class="pill {{ c.status }}">{{ COMPLAINT_STATUS_LABELS.get(c.status, c.status) }}</span></td>
+    <td>{{ c.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+    <td>
+      {% if c.status == 'new' %}
+      <form class="inline" method="post" action="/admin/complaints/{{ c.id }}/resolve">
+        <button class="btn small" type="submit">Решена</button>
+      </form>
+      <form class="inline" method="post" action="/admin/complaints/{{ c.id }}/reject">
+        <button class="btn small secondary" type="submit">Отклонить</button>
+      </form>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="empty">Жалоб не найдено</div>
+{% endif %}
+{% endblock %}

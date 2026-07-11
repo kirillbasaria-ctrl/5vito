@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Вход — Админ-панель</title>
+  <link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-box">
+      <h1>Админ-панель</h1>
+      <div class="sub">Доска объявлений Вологодской области</div>
+      {% if error %}<div class="error">{{ error }}</div>{% endif %}
+      <form method="post" action="/admin/login">
+        <input type="email" name="email" placeholder="Email" required autofocus>
+        <input type="password" name="password" placeholder="Пароль" required>
+        <button type="submit" class="btn">Войти</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

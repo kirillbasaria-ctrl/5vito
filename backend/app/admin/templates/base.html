@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Админ-панель{% endblock %} — Доска объявлений Вологодской области</title>
+  <link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">Доска объявлений<br>Вологодской области</div>
+      <nav>
+        <a href="/admin/" class="{{ 'active' if active == 'dashboard' }}">Дашборд</a>
+        <a href="/admin/ads" class="{{ 'active' if active == 'ads' }}">Объявления</a>
+        <a href="/admin/users" class="{{ 'active' if active == 'users' }}">Пользователи</a>
+        <a href="/admin/complaints" class="{{ 'active' if active == 'complaints' }}">Жалобы</a>
+        <a href="/admin/reviews" class="{{ 'active' if active == 'reviews' }}">Отзывы</a>
+      </nav>
+      {% if admin %}
+      <div class="whoami">
+        {{ admin.name }}<br>
+        <span class="pill role-{{ admin.role }}">{{ ROLE_LABELS[admin.role] }}</span>
+        <br><br>
+        <a href="/admin/logout">Выйти</a>
+      </div>
+      {% endif %}
+    </aside>
+    <main class="main">
+      {% if msg %}<div class="flash">{{ msg }}</div>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

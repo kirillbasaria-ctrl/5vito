@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Объявление #{{ ad.id if ad else '' }}{% endblock %}
+{% block content %}
+{% if not ad %}
+<div class="empty">Объявление не найдено</div>
+{% else %}
+<h1>{{ ad.title }} <span class="pill {{ ad.status }}">{{ AD_STATUS_LABELS.get(ad.status, ad.status) }}</span></h1>
+
+<div class="detail-grid">
+  <div>
+    <div class="detail-card">
+      <div class="row"><span class="k">Описание</span></div>
+      <p>{{ ad.description }}</p>
+      {% if ad.images %}
+      <div class="thumbs">
+        {% for img in ad.images %}
+        <img src="{{ img.filename and ('/uploads/' ~ img.filename) }}" alt="">
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="detail-card">
+      <div class="row"><span class="k">Категория</span><span>{{ CATEGORY_LABELS.get(ad.category, ad.category) }}</span></div>
+      <div class="row"><span class="k">Город</span><span>{{ CITY_LABELS.get(ad.city, ad.city) }}</span></div>
+      <div class="row"><span class="k">Цена</span><span>{{ ad.price if ad.price is not none else 'Договорная' }}</span></div>
+      <div class="row"><span class="k">Просмотры</span><span>{{ ad.views }}</span></div>
+      <div class="row"><span class="k">Создано</span><span>{{ ad.created_at.strftime('%d.%m.%Y %H:%M') }}</span></div>
+      <div class="row"><span class="k">Обновлено</span><span>{{ ad.updated_at.strftime('%d.%m.%Y %H:%M') }}</span></div>
+    </div>
+
+    {% if ad.complaints %}
+    <div class="detail-card">
+      <div class="row"><span class="k">Жалобы на это объявление</span><span>{{ ad.complaints|length }}</span></div>
+      {% for c in ad.complaints %}
+      <div class="row"><span class="k">{{ COMPLAINT_REASON_LABELS.get(c.reason, c.reason) }}</span><span class="pill {{ c.status }}">{{ COMPLAINT_STATUS_LABELS.get(c.status, c.status) }}</span></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="detail-card">
+      <div class="row"><span class="k">Автор</span><span>{{ ad.owner.name if ad.owner else '—' }}</span></div>
+      <div class="row"><span class="k">Email</span><span>{{ ad.owner.email if ad.owner else '—' }}</span></div>
+      <div class="row"><span class="k">Телефон</span><span>{{ ad.owner.phone or '—' if ad.owner else '—' }}</span></div>
+    </div>
+
+    <div class="detail-card">
+      <div class="actions-row">
+        {% if ad.status == 'active' %}
+        <form class="inline" method="post" action="/admin/ads/{{ ad.id }}/hide">
+          <button class="btn amber" type="submit">Скрыть</button>
+        </form>
+        {% elif ad.status == 'hidden' %}
+        <form class="inline" method="post" action="/admin/ads/{{ ad.id }}/unhide">
+          <button class="btn" type="submit">Вернуть в публикацию</button>
+        </form>
+        {% endif %}
+
+        {% if ad.status == 'deleted' %}
+        <form class="inline" method="post" action="/admin/ads/{{ ad.id }}/restore">
+          <button class="btn" type="submit">Восстановить</button>
+        </form>
+        {% else %}
+        <form class="inline" method="post" action="/admin/ads/{{ ad.id }}/delete"
+              onsubmit="return confirm('Удалить объявление?');">
+          <button class="btn danger" type="submit">Удалить</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="/admin/ads">← Назад к списку</a>
+{% endif %}
+{% endblock %}

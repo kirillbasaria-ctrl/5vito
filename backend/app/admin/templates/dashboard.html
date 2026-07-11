@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Дашборд{% endblock %}
+{% block content %}
+<h1>Дашборд</h1>
+
+<div class="cards">
+  <div class="stat-card"><div class="num">{{ counts.get('active', 0) }}</div><div class="label">Активных объявлений</div></div>
+  <div class="stat-card"><div class="num">{{ counts.get('draft', 0) }}</div><div class="label">Черновиков</div></div>
+  <div class="stat-card"><div class="num">{{ counts.get('hidden', 0) }}</div><div class="label">Скрыто модерацией</div></div>
+  <div class="stat-card"><div class="num">{{ counts.get('deleted', 0) }}</div><div class="label">Удалено</div></div>
+  <div class="stat-card"><div class="num">{{ users_count }}</div><div class="label">Пользователей</div></div>
+  <div class="stat-card"><div class="num">{{ new_complaints_count }}</div><div class="label">Новых жалоб</div></div>
+</div>
+
+<h2>Последние жалобы</h2>
+{% if recent_complaints %}
+<table>
+  <tr><th>Объявление</th><th>Автор жалобы</th><th>Причина</th><th>Статус</th><th>Дата</th><th></th></tr>
+  {% for c in recent_complaints %}
+  <tr>
+    <td>{{ c.ad.title if c.ad else '—' }}</td>
+    <td>{{ c.author.name if c.author else '—' }}</td>
+    <td>{{ COMPLAINT_REASON_LABELS.get(c.reason, c.reason) }}</td>
+    <td><span class="pill {{ c.status }}">{{ COMPLAINT_STATUS_LABELS.get(c.status, c.status) }}</span></td>
+    <td>{{ c.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+    <td><a href="/admin/complaints">открыть</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="empty">Жалоб пока нет</div>
+{% endif %}
+
+<h2>Последние объявления</h2>
+{% if recent_ads %}
+<table>
+  <tr><th>Название</th><th>Автор</th><th>Статус</th><th>Дата</th><th></th></tr>
+  {% for ad in recent_ads %}
+  <tr>
+    <td>{{ ad.title }}</td>
+    <td>{{ ad.owner.name if ad.owner else '—' }}</td>
+    <td><span class="pill {{ ad.status }}">{{ AD_STATUS_LABELS.get(ad.status, ad.status) }}</span></td>
+    <td>{{ ad.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+    <td><a href="/admin/ads/{{ ad.id }}">открыть</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="empty">Объявлений пока нет</div>
+{% endif %}
+{% endblock %}

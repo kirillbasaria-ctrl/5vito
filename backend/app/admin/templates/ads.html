@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Объявления{% endblock %}
+{% block content %}
+<h1>Объявления <span class="muted" style="font-size:14px;">({{ total }})</span></h1>
+
+<form class="filters" method="get" action="/admin/ads">
+  <select name="status">
+    <option value="">Все статусы</option>
+    {% for slug, label in AD_STATUS_LABELS.items() %}
+    <option value="{{ slug }}" {{ 'selected' if filters.status == slug }}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select name="category">
+    <option value="">Все категории</option>
+    {% for slug, label in CATEGORY_LABELS.items() %}
+    <option value="{{ slug }}" {{ 'selected' if filters.category == slug }}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select name="city">
+    <option value="">Все города</option>
+    {% for slug, label in CITY_LABELS.items() %}
+    <option value="{{ slug }}" {{ 'selected' if filters.city == slug }}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <input type="text" name="search" placeholder="Поиск по названию" value="{{ filters.search }}">
+  <button type="submit">Найти</button>
+</form>
+
+{% if ads %}
+<table>
+  <tr><th>#</th><th>Название</th><th>Категория</th><th>Город</th><th>Цена</th><th>Автор</th><th>Статус</th><th>Дата</th><th></th></tr>
+  {% for ad in ads %}
+  <tr>
+    <td>{{ ad.id }}</td>
+    <td>{{ ad.title }}</td>
+    <td>{{ CATEGORY_LABELS.get(ad.category, ad.category) }}</td>
+    <td>{{ CITY_LABELS.get(ad.city, ad.city) }}</td>
+    <td>{{ ad.price if ad.price is not none else 'Договорная' }}</td>
+    <td>{{ ad.owner.name if ad.owner else '—' }}</td>
+    <td><span class="pill {{ ad.status }}">{{ AD_STATUS_LABELS.get(ad.status, ad.status) }}</span></td>
+    <td>{{ ad.created_at.strftime('%d.%m.%Y') }}</td>
+    <td><a href="/admin/ads/{{ ad.id }}">открыть</a></td>
+  </tr>
+  {% endfor %}
+</table>
+<div class="pager">
+  {% if has_prev %}<a class="btn small secondary" href="?status={{ filters.status }}&category={{ filters.category }}&city={{ filters.city }}&search={{ filters.search }}&page={{ page - 1 }}">← Назад</a>{% endif %}
+  <span class="muted">Страница {{ page }}</span>
+  {% if has_next %}<a class="btn small secondary" href="?status={{ filters.status }}&category={{ filters.category }}&city={{ filters.city }}&search={{ filters.search }}&page={{ page + 1 }}">Вперёд →</a>{% endif %}
+</div>
+{% else %}
+<div class="empty">Ничего не найдено</div>
+{% endif %}
+{% endblock %}

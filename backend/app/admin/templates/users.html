@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Пользователи{% endblock %}
+{% block content %}
+<h1>Пользователи</h1>
+
+<form class="filters" method="get" action="/admin/users">
+  <input type="text" name="search" placeholder="Поиск по имени или email" value="{{ filters.search }}">
+  <select name="role">
+    <option value="">Все роли</option>
+    {% for slug, label in ROLE_LABELS.items() %}
+    <option value="{{ slug }}" {{ 'selected' if filters.role == slug }}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Найти</button>
+</form>
+
+{% if users %}
+<table>
+  <tr><th>#</th><th>Имя</th><th>Email</th><th>Город</th><th>Роль</th><th>Статус</th><th>Регистрация</th><th>Действия</th></tr>
+  {% for u in users %}
+  <tr>
+    <td>{{ u.id }}</td>
+    <td>{{ u.name }}</td>
+    <td>{{ u.email }}</td>
+    <td>{{ CITY_LABELS.get(u.city, '—') if u.city else '—' }}</td>
+    <td>
+      <span class="pill role-{{ u.role }}">{{ ROLE_LABELS.get(u.role, u.role) }}</span>
+      {% if admin.role == 'admin' %}
+      <form class="inline" method="post" action="/admin/users/{{ u.id }}/role" style="margin-left:6px;">
+        <select name="role" onchange="this.form.submit()" style="font-size:11px; padding:2px;">
+          {% for slug, label in ROLE_LABELS.items() %}
+          <option value="{{ slug }}" {{ 'selected' if u.role == slug }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      {% endif %}
+    </td>
+    <td>{{ 'Заблокирован' if u.is_banned else 'Активен' }}</td>
+    <td>{{ u.created_at.strftime('%d.%m.%Y') }}</td>
+    <td>
+      {% if u.is_banned %}
+      <form class="inline" method="post" action="/admin/users/{{ u.id }}/unban">
+        <button class="btn small" type="submit">Разблокировать</button>
+      </form>
+      {% elif u.role != 'admin' %}
+      <form class="inline" method="post" action="/admin/users/{{ u.id }}/ban" onsubmit="return confirm('Заблокировать пользователя?');">
+        <button class="btn small danger" type="submit">Заблокировать</button>
+      </form>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="empty">Пользователи не найдены</div>
+{% endif %}
+{% endblock %}
